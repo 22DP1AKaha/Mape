@@ -1,41 +1,41 @@
-// starts off with the first place to show
+// izveido karti ar skatu uz rīgu un pietuvinājumu 13
 var map = L.map('map').setView([56.9467, 24.1203], 13);
 
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
+    maxZoom: 19, // max pietuvinājums
     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }).addTo(map);
 
-// places the marker on the first shown place -> Riga
+// uztaisa marķieri rīgas centrālajā stacijā ar uznirstošo logu
 var marker = L.marker([56.9467, 24.1203]).addTo(map);
-marker.bindPopup("<b>Rīga</b><br>Rīgas Centrālā stacija").openPopup();
+marker.bindPopup("<b>rīga</b><br>rīgas centrālā stacija").openPopup();
 
-// defines the source and destination coordinate systems
+// definē koordinātu sistēmas no kuras un uz kuru pārveidot
 var sourceProj = 'EPSG:3059';
 var destProj = 'EPSG:4326';
 
-// fetches a json file
+// ielādē datus no "dati.json" un apstrādā tos
 fetch('dati.json')
-    .then(response => response.json())
+    .then(response => response.json()) // pārvērš atbildi par json formātu
     .then(data => {
-        console.log('JSON data:', data); // Debug log
+        console.log('json data:', data); // parāda datus konsolē
 
-        // loops through the features array
+        // katrai vietai (feature) dabū koordinātas un īpašības
         data.features.forEach(function(feature) {
-            // extracts coordinates and properties
             var coordinates = feature.geometry.coordinates;
             var properties = feature.properties;
 
-            console.log('Original coordinates:', coordinates); // Debug log
+            console.log('original coordinates:', coordinates); // sākotnējās koordinātas
 
-            // transforms the coordinates
+            // pārveido koordinātas uz epsg:4326
             var transformedCoordinates = proj4(sourceProj, destProj, coordinates);
 
-            console.log('Transformed coordinates:', transformedCoordinates); // Debug log
+            console.log('transformed coordinates:', transformedCoordinates); // parāda pārveidotās koordinātas
 
-            // adds a marker for each feature
+            // izveido marķieri ar pārveidotām koordinātām un uznirstošo logu ar vietas nosaukumu
             L.marker([transformedCoordinates[1], transformedCoordinates[0]]).addTo(map)
                 .bindPopup(properties.PLACENAME);
         });
     })
-    .catch(error => console.error('Error fetching the JSON file:', error));
+    // kļūdas gadījumā izvada ziņu
+    .catch(error => console.error('error fetching the json file:', error));
